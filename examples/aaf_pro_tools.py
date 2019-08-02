@@ -2,6 +2,27 @@ import aaf2
 import argparse
 import os.path
 
+import subprocess
+import json
+import os.path
+import os
+
+
+FFPROBE_CMD = '/usr/local/bin/ffprobe'
+
+def probe(filename):
+    absfilename = os.path.abspath(filename)
+    cmd = [ FFPROBE_CMD , '-of', 'json', '-show_format', '-show_streams', absfilename]
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = p.communicate()
+
+    if p.returncode != 0:
+        raise subprocess.CalledProcessError(p.returncode,
+                                            subprocess.list2cmdline(cmd),
+                                            stderr)
+
+    return json.loads(stdout.decode('utf8'))
+
 
 def make_aaf(sequence_name, timeline_fps = 24, sample_rate = 48000, output_file='TestForImport.aaf', link_files = []):
 
